@@ -22,25 +22,17 @@ def to_base_64(string):
 		num_val |= bytes_string[1] << 8
 		num_val |= bytes_string[2]
 
-		if len(working_string) >= 3 or (len(working_string) < 3 and nb_of_null_bytes_needed is 0):
-			output_string += CHAR[(num_val & 0xFC0000) >> 18]
-			output_string += CHAR[(num_val & 0x3F000)>>12]
-			output_string += CHAR[(num_val & 0xFC0)>>6]
-			output_string += CHAR[num_val & 0x3F]
+		third_part_is_eq = len(working_string) < 3 and nb_of_null_bytes_needed is 2
+		fourth_part_is_eq = len(working_string) < 3 and nb_of_null_bytes_needed <= 2
 
-		elif nb_of_null_bytes_needed is 1:
-			output_string += CHAR[(num_val & 0xFC0000) >> 18]
-			output_string += CHAR[(num_val & 0x3F000)>>12]
-			output_string += CHAR[(num_val & 0xFC0)>>6]
-			output_string += CHAR[-1]
-
-		else: # nb_of_null_bytes_needed is 2:
-			output_string += CHAR[(num_val & 0xFC0000) >> 18]
-			output_string += CHAR[(num_val & 0x3F000)>>12]
-			output_string += CHAR[-1]
-			output_string += CHAR[-1]
+		output_string += CHAR[(num_val & 0xFC0000) >> 18]
+		output_string += CHAR[(num_val & 0x3F000)>>12]
+		output_string += CHAR[(num_val & 0xFC0)>>6] if not third_part_is_eq else CHAR[-1]
+		output_string += CHAR[num_val & 0x3F] if not fourth_part_is_eq else CHAR[-1]
 
 	return output_string
+
+
 
 def test_to_base_64():
 	string = input('Chaîne à compresser :')
