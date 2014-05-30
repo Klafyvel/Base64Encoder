@@ -36,11 +36,22 @@ def is_valid_base_64(string):
 	returned = True
 	for c in string:
 		returned &= c in CHAR
+
+	returned &= len(string) % 4 is 0
+
+	#A Base64 string should not end with '==='
+	returned &= not(string[-1] is '=' and string[-2] is '=' and string[-3] is '=')
 	return returned
+
+def found_a_char_value(char):
+	return CHAR.find(char)
 
 def from_base_64(string):
 	if not is_valid_base_64(string):
 		raise ValueError('"{}" is not a valid base 64 string.'.format(string))
+
+
+
 
 
 def test_to_base_64():
