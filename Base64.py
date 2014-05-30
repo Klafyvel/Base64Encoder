@@ -33,10 +33,14 @@ def to_base_64(string):
 	return output_string
 
 def is_valid_base_64(string):
-	returned = False
+	returned = True
 	for c in string:
-		returned |= c in CHAR
+		returned &= c in CHAR
 	return returned
+
+def from_base_64(string):
+	if not is_valid_base_64(string):
+		raise ValueError('"{}" is not a valid base 64 string.'.format(string))
 
 
 def test_to_base_64():
