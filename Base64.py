@@ -32,6 +32,11 @@ def to_base_64(string):
 
 	return output_string
 
+def is_valid_base_64(string):
+	returned = False
+	for c in string:
+		returned |= c in CHAR
+	return returned
 
 
 def test_to_base_64():
