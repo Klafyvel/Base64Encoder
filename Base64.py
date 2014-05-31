@@ -85,8 +85,10 @@ def from_base_64(string):
 	return remove_null_char(output_string)
 
 
-
-
 def test_to_base_64():
-	string = input('Chaîne à compresser :')
+	string = input('Chaîne à encoder :')
 	print(to_base_64(string))
+
+def test_from_base_64():
+	string = input('Chaîne à décoder :')
+	print(from_base_64(string))
