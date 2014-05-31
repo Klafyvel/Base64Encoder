@@ -11,7 +11,7 @@ def add_null_bytes(string, nb_of_null):
 
 def to_base_64(string):
 	output_string = ''
-	nb_of_null_bytes_needed = (3 - len(string)%3)
+	nb_of_null_bytes_needed = (3 - len(bytes(string, 'utf-8'))%3)
 	working_string = bytes(add_null_bytes(string, nb_of_null_bytes_needed), 'utf-8') 
 
 	while len(working_string) >= 3:
@@ -77,6 +77,10 @@ def from_base_64(string):
 		num_val =  first_char_val | (second_char_val << 6)
 		num_val |= third_char_val << 12
 		num_val |= fourth_char_val << 18
+
+		print(bin(num_val>>16))
+		print(bin((num_val & 0xFF00) >> 8))
+		print(bin((num_val & 0xFF)))
 		
 		output_string += chr(num_val>>16)
 		output_string += chr((num_val & 0xFF00) >> 8)
