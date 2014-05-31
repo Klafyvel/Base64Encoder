@@ -49,6 +49,15 @@ def found_a_char_value(char):
 	else:
 		return CHAR.find(char)
 
+def remove_null_char(string):
+	output_string = ''
+	for c in string:
+		if not c is'\0':
+			output_string += c
+
+	return output_string
+
+
 def from_base_64(string):
 	if not is_valid_base_64(string):
 		raise ValueError('"{}" is not a valid base 64 string.'.format(string))
@@ -73,7 +82,7 @@ def from_base_64(string):
 		output_string += chr((num_val & 0xFF00) >> 8)
 		output_string += chr((num_val & 0xFF))
 
-	return output_string
+	return remove_null_char(output_string)
 
 
 
