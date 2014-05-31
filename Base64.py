@@ -1,6 +1,6 @@
 #! /usr/bin/python3
 
-CHAR= 'ABCDEFGHIJKLMNOPGRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='
+CHAR= 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='
 
 def add_null_bytes(string, nb_of_null):
 	working_string = string
@@ -44,12 +44,36 @@ def is_valid_base_64(string):
 	return returned
 
 def found_a_char_value(char):
-	return CHAR.find(char)
+	if char is '=':
+		return 0
+	else:
+		return CHAR.find(char)
 
 def from_base_64(string):
 	if not is_valid_base_64(string):
 		raise ValueError('"{}" is not a valid base 64 string.'.format(string))
 
+	output_string = u''
+	working_string = string
+
+	while len(working_string) >= 4:
+		cutted_string = working_string[:4]
+		working_string = working_string[4:]
+
+		first_char_val = found_a_char_value(cutted_string[3])
+		second_char_val = found_a_char_value(cutted_string[2])
+		third_char_val = found_a_char_value(cutted_string[1])
+		fourth_char_val = found_a_char_value(cutted_string[0])
+
+		num_val =  first_char_val | (second_char_val << 6)
+		num_val |= third_char_val << 12
+		num_val |= fourth_char_val << 18
+		
+		output_string += chr(num_val>>16)
+		output_string += chr((num_val & 0xFF00) >> 8)
+		output_string += chr((num_val & 0xFF))
+
+	return output_string
 
 
 
