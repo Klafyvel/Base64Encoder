@@ -6,25 +6,24 @@ CHAR= 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='
 def add_null_bytes(string, nb_of_null):
 	working_string = string
 	for i in range(0, nb_of_null):
-		working_string += '\0'
-
+		working_string += b'\0'
 	return working_string
 
 def to_base_64(string):
 	output_string = ''
-	nb_of_null_bytes_needed = (3 - len(bytes(string, 'utf-8'))%3)
-	working_string = bytes(add_null_bytes(string, nb_of_null_bytes_needed), 'utf-8') 
+	nb_of_null_bytes_needed = (3 - len(string))%3 
+	working_string = add_null_bytes(string, nb_of_null_bytes_needed)
 
 	while len(working_string) >= 3:
-		bytes_string = working_string[:3]
+		cutted_string = working_string[:3]
 		working_string = working_string[3:]
 
-		num_val = bytes_string[0] << 16
-		num_val |= bytes_string[1] << 8
-		num_val |= bytes_string[2]
+		num_val = cutted_string[0] << 16
+		num_val |= cutted_string[1] << 8
+		num_val |= cutted_string[2]
 
 		third_part_is_eq = len(working_string) < 3 and nb_of_null_bytes_needed is 2
-		fourth_part_is_eq = len(working_string) < 3 and nb_of_null_bytes_needed <= 2
+		fourth_part_is_eq = len(working_string) < 3 and nb_of_null_bytes_needed in [1, 2]
 
 		output_string += CHAR[(num_val & 0xFC0000) >> 18]
 		output_string += CHAR[(num_val & 0x3F000)>>12]
@@ -50,21 +49,14 @@ def found_a_char_value(char):
 	else:
 		return CHAR.find(char)
 
-def remove_null_char(string):
-	output_string = ''
-	for c in string:
-		if not c is'\0':
-			output_string += c
-
-	return output_string
-
-
 def from_base_64(string):
 	if not is_valid_base_64(string):
 		raise ValueError('"{}" is not a valid base 64 string.'.format(string))
 
-	output_string = u''
+	output_string = []
 	working_string = string
+
+	nb_eq = (1 if string[-1] is '=' else 0) + (1 if string[-2] is '=' else 0)
 
 	while len(working_string) >= 4:
 		cutted_string = working_string[:4]
@@ -78,22 +70,31 @@ def from_base_64(string):
 		num_val =  first_char_val | (second_char_val << 6)
 		num_val |= third_char_val << 12
 		num_val |= fourth_char_val << 18
-
-		print(bin(num_val>>16))
-		print(bin((num_val & 0xFF00) >> 8))
-		print(bin((num_val & 0xFF)))
 		
-		output_string += chr(num_val>>16)
-		output_string += chr((num_val & 0xFF00) >> 8)
-		output_string += chr((num_val & 0xFF))
+		output_string.append(num_val>>16)
+		if len(working_string) >= 4 or nb_eq <= 1:
+			output_string.append((num_val & 0xFF00) >> 8)
+		if len(working_string) >= 4 or nb_eq is 0: 
+			output_string.append((num_val & 0xFF))
 
-	return remove_null_char(output_string)
+	return bytes(output_string)
 
+def encode_file(filename):
+	string = []
+	with open(filename, 'rb') as in_file:
+		string = in_file.read()
+	with open(filename + '.base64', 'w') as out_file:
+		out_file.write(to_base_64(string))
 
-def test_to_base_64():
-	string = input('Chaîne à encoder :')
-	print(to_base_64(string))
+def decode_file(filename):
+	string = ''
+	with open(filename, 'r') as in_file:
+		string = in_file.read()
+	string = from_base_64(string)
+	with open(filename + '.dec', 'wb') as out_file:
+		out_file.write(string)
 
-def test_from_base_64():
-	string = input('Chaîne à décoder :')
-	print(from_base_64(string))
+def encode_string(string):
+	return to_base_64(string.encode('utf-8'))
+def decode_string(string):
+	return from_base_64(string).decode('utf-8')
